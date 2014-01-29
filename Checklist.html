@@ -1,0 +1,108 @@
+<html>
+    <head>
+	<link rel="stylesheet" type="text/css" href="css/checklist.css" />
+        <script>
+		// a local version of the checklist; saves and loads to localStorage
+		listItems = [];
+		// adds a UI checklist item to the webpage
+		// param index: where the item is in listItems (let's me keep the checked property always synced)
+		function createListItem(index){			
+			var li = document.createElement("li");
+			var data = document.createElement("p");
+			data.innerText = listItems[index].data;
+			var chbox = document.createElement("input");
+			chbox.setAttribute("type","checkbox");	
+			if(listItems[index].checked === true){
+				li.setAttribute("class","strike");
+				chbox.checked = true;
+			}
+			chbox.onclick = flipCheck(index,li);
+			li.appendChild(chbox);
+			li.appendChild(data);				
+			document.getElementById("list").appendChild(li);
+		}
+		// adds a new item to listItems and calls createListItem
+		// called by the "Submit" button
+		function newItem(){
+			var txtbox = document.getElementById("textbox");
+			var txtdata = txtbox.value || "List Item"
+			listItem = {
+				data: txtdata,
+				checked: false
+			}
+			listItems.push(listItem);
+			createListItem(listItems.length-1);			
+			updateStorage();
+			txtbox.value = "";
+		}
+		
+		// Uses closure! This function is used in line 19.
+		// This lets each list item individually control being crossed out or not
+		function flipCheck(index, li){	
+			return function(){
+				if(listItems[index].checked === false){
+					li.setAttribute("class","strike");
+					listItems[index].checked = true;
+				}
+				else{
+					li.removeAttribute("class");
+					listItems[index].checked = false;
+				}
+				updateStorage();
+			};
+			
+		}
+		
+		// Used for initializing localStorage on page loads
+		function loadStorage(){
+			if(!localStorage.getItem("listItems"))
+				localStorage.setItem("listItems","");
+			else
+				listItems = JSON.parse(localStorage.getItem("listItems"));				
+		}
+		
+		// Updates localStorage when changes are made to listItems
+		function updateStorage(){
+			localStorage.setItem("listItems", JSON.stringify(listItems));
+		}
+		
+		// clears localStorage then reloads page
+		function clearAll(){
+			localStorage.setItem("listItems","")
+			location.reload();
+		}
+		
+		// only removes checked items from listItems then updates localStorage and the page
+		function clearChecked(){
+			for(var i = 0; i<listItems.length; i++){
+				if(listItems[i].checked){
+					listItems.splice(i,1);					
+					i--;
+				}
+			}
+			updateStorage();
+			location.reload();
+		}
+		
+		// once the page is loaded, load localStorage and generate the ui for the checklist
+		window.onload = function(){
+			loadStorage();
+			for(var i=0; i<listItems.length; i++){
+				createListItem(i);
+			}
+		}
+        </script>
+    </head>
+
+    <body>
+	<h1>Checklist</h1>
+	<ul id="list"></ul>
+	<div id="input">
+		<input id="textbox" placeholder="Title">
+		<button onclick="newItem()">Submit</button></br></br>
+		<button onclick="clearChecked()">Clear Checked</button>
+		<button onclick="clearAll()">Clear All</button>
+	</div>
+    </body>
+
+</html>

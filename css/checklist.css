@@ -1,0 +1,10 @@
+ul li{
+	list-style-type: none;
+}
+li p{
+	display: inline
+}
+
+.strike{
+	text-decoration:line-through
+}
